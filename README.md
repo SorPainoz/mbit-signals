@@ -20,8 +20,7 @@ n/a
 
 ## Multiphase Plan
 
-### 1. 
-Microbit has two states FREE and ON-CALL rendered on its screen and they can be selected via the phisical buttons present on the Microbit.
+### 1. Microbit has two states FREE and ON-CALL rendered on its screen and they can be selected via the phisical buttons present on the Microbit.
 
 ### 2. My son can chan with the Microbit via a chrome extension 
 
