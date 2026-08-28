@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>micro:bit BLE Tester</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; }
+    button { padding: 10px 16px; margin: 5px 5px 5px 0; cursor: pointer; font-size: 14px; }
+    #status, #stateDisplay { font-weight: bold; margin-bottom: 15px; }
+    .control-group { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+    pre { background: #333; color: #0f0; padding: 10px; height: 150px; overflow-y: scroll; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <h2>micro:bit BLE Tester</h2>
+
+  <button id="connectBtn">🔌 Connect to micro:bit</button>
+  <div id="status">Status: Disconnected</div>
+  <div id="stateDisplay">Current State: Unknown</div>
+
+  <div class="control-group">
+    <button id="btnState" disabled>❓ Get State (?STATE)</button>
+    <button id="btnModeA" disabled>🅰️ Set MODE_A</button>
+    <button id="btnModeB" disabled>🅱️ Set MODE_B</button>
+  </div>
+
+  <h4>Incoming UART Log:</h4>
+  <pre id="log"></pre>
+
+  <script>
+    const UART_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    const UART_RX_CHAR = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // Browser writes to this
+    const UART_TX_CHAR = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // Browser reads from this
+
+    let rxCharacteristic;
+
+    if (!navigator.bluetooth) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Status: ❌ WebBluetooth unavailable';
+      logMessage('Error: navigator.bluetooth is missing. Chrome/Edge on localhost or HTTPS is required, and on Linux Chrome ships Web Bluetooth off by default: enable chrome://flags/#enable-experimental-web-platform-features and relaunch, or launch Chrome with --enable-features=WebBluetooth.');
+    }
+
+    function logMessage(msg) {
+      const log = document.getElementById('log');
+      log.textContent += msg + '\n';
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendCommand(command) {
+      if (!rxCharacteristic) return;
+      const encoder = new TextEncoder();
+      // Must append newline (\n) because MakeCode is listening for it
+      await rxCharacteristic.writeValue(encoder.encode(command + '\n'));
+      logMessage(`Sent: ${command}`);
+    }
+
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+      const statusEl = document.getElementById('status');
+      try {
+        statusEl.textContent = 'Status: Requesting Bluetooth Device...';
+
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: 'BBC micro:bit' }],
+          optionalServices: [UART_SERVICE]
+        });
+
+        statusEl.textContent = 'Status: Connecting to GATT Server...';
+        const server = await device.gatt.connect();
+
+        statusEl.textContent = 'Status: Getting UART Service...';
+        const service = await server.getPrimaryService(UART_SERVICE);
+
+        rxCharacteristic = await service.getCharacteristic(UART_RX_CHAR);
+        const txCharacteristic = await service.getCharacteristic(UART_TX_CHAR);
+
+        await txCharacteristic.startNotifications();
+        txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
+          const value = new TextDecoder().decode(e.target.value).trim();
+          logMessage(`Received: ${value}`);
+
+          if (value.startsWith("STATE:")) {
+             document.getElementById('stateDisplay').textContent = `Current State: ${value.split(":")[1]}`;
+          }
+        });
+
+        statusEl.textContent = 'Status: ✅ Connected';
+
+        // Enable the control buttons
+        document.getElementById('btnState').disabled = false;
+        document.getElementById('btnModeA').disabled = false;
+        document.getElementById('btnModeB').disabled = false;
+
+        // Auto-fetch state upon connection
+        sendCommand("?STATE");
+
+      } catch (error) {
+        logMessage(`Error: ${error.message}`);
+        statusEl.textContent = 'Status: ❌ Error (See log)';
+      }
+    });
+
+    // Button Event Listeners
+    document.getElementById('btnState').addEventListener('click', () => sendCommand('?STATE'));
+    document.getElementById('btnModeA').addEventListener('click', () => sendCommand('MODE_A'));
+    document.getElementById('btnModeB').addEventListener('click', () => sendCommand('MODE_B'));
+  </script>
+</body>
+</html>
