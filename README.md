@@ -30,7 +30,8 @@ Feasibility needs to be evaluated, in fact the design was drive by what I learne
 
 ## Future work/ideas
 
-- add more states
-- allow my son to draw what it will show on the display.
-- a mood signal
+- Add more states
+- Allow my son to draw what it will show on the display.
+- A mood signal
 - Mobile client/web app
+- Wire mIcrobit with additional components (low fidelity)
