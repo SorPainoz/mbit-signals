@@ -3,8 +3,8 @@
   "name": "MicrobitSignals Remote",
   "version": "0.1.0",
   "description": "Flip the door micro:bit between ON-CALL and FREE from the toolbar.",
-  "permissions": ["bluetooth"],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {}
 }

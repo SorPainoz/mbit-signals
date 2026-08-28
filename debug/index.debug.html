@@ -29,10 +29,12 @@
 
   <script>
     const UART_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-    const UART_RX_CHAR = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // Browser writes to this
-    const UART_TX_CHAR = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // Browser reads from this
+    // NOTE: the micro:bit's codal UART service REVERSES the standard Nordic
+    // UART characteristic ids: write commands to 6e400003, subscribe to 6e400002.
+    const UART_WRITE_CHAR = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // Browser writes commands here
+    const UART_SUBSCRIBE_CHAR = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // Browser reads STATE here (indications)
 
-    let rxCharacteristic;
+    let writeCharacteristic;
 
     if (!navigator.bluetooth) {
       const statusEl = document.getElementById('status');
@@ -47,10 +49,10 @@
     }
 
     async function sendCommand(command) {
-      if (!rxCharacteristic) return;
+      if (!writeCharacteristic) return;
       const encoder = new TextEncoder();
       // Must append newline (\n) because MakeCode is listening for it
-      await rxCharacteristic.writeValue(encoder.encode(command + '\n'));
+      await writeCharacteristic.writeValue(encoder.encode(command + '\n'));
       logMessage(`Sent: ${command}`);
     }
 
@@ -70,11 +72,11 @@
         statusEl.textContent = 'Status: Getting UART Service...';
         const service = await server.getPrimaryService(UART_SERVICE);
 
-        rxCharacteristic = await service.getCharacteristic(UART_RX_CHAR);
-        const txCharacteristic = await service.getCharacteristic(UART_TX_CHAR);
+        writeCharacteristic = await service.getCharacteristic(UART_WRITE_CHAR);
+        const subscribeCharacteristic = await service.getCharacteristic(UART_SUBSCRIBE_CHAR);
 
-        await txCharacteristic.startNotifications();
-        txCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
+        await subscribeCharacteristic.startNotifications();
+        subscribeCharacteristic.addEventListener('characteristicvaluechanged', (e) => {
           const value = new TextDecoder().decode(e.target.value).trim();
           logMessage(`Received: ${value}`);
 
