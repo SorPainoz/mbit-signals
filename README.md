@@ -18,9 +18,19 @@ n/a
 ## Not in scope
 n/a
 
-## Multiphase Plan
+## Multiphase Plan towards MVP
 
 ### 1. Microbit has two states FREE and ON-CALL that can be rendered on its screen. A state can be selected via the phisical buttons present on the Microbit.
 
 ### 2. My son can interact with the Microbit via a chrome extension instead of using the phisical buttons
 
+Feasibility needs to be evaluated, in fact the design was drive by what I learned from a [chat with Gemini](docs/requirements/mbit-remote-acess.research.md).
+
+
+
+## Future work/ideas
+
+- add more states
+- allow my son to draw what it will show on the display.
+- a mood signal
+- Mobile client/web app
