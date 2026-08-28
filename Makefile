@@ -15,8 +15,5 @@ firmware-console: ## open the pxt serial console
 test: ## run pxt firmware tests
 	$(MAKE) -C firmware test
 
-serve: debug/node_modules/.bin/serve ## serve the BLE debug tester on tcp://0.0.0.0:3000
-	./debug/node_modules/.bin/serve debug -l tcp://0.0.0.0:3000
-
-debug/node_modules/.bin/serve:
-	cd debug && npm install --no-audit --no-fund
+serve: ## serve the BLE debug tester on tcp://0.0.0.0:3000 (only index.debug.html)
+	node debug/serve.mjs
