@@ -2,19 +2,21 @@
 
 ## Context & Problem statement
 
-My son is playing online with his friends and I want avoid accidentaly popping by,
-therefore we tought about adding a signal to his door.
-Because we have a Microbit V2 sitting around, we decided to leverage its screen (led matrix 9x9).
+My son is playing online with his friends and I want avoid accidentaly popping by.
+Therefore we tought about adding a signal to his door.
+Because we have a Microbit V2 sitting around, we decided to leverage its display (led matrix 9x9) to show the signals.
 
 
 ## Mission: Allow my son to signal if he's on call
 
 ## Success looks like
-A microbit is "attached" to the door
+A microbit is powered and "attached" to my son's door and he can control what's shown on the display.
 
 ## Constraints
+n/a
 
 ## Not in scope
+n/a
 
 ## Multiphase Plan
 
